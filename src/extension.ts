@@ -1,26 +1,44 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+const TerminalInfoRe = /^[0-9]+ passed, [0-9]+ failed, [0-9]+ ignored, [0-9]+ warnings/;
+const TerminalClsRe =  /^\> [A-Za-z]+\.\.\./ ;
+const TerminalItemResultRe = /^\| [A-Za-z]+\.\.\. (passed | failed)/;
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "confirma-testadapter" is now active!');
+const classHeader = "[TestClass]";
+const itemHeader = "[TestCase]";
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('confirma-testadapter.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage(`Hello VS Code`);
-	});
+const CSharpClassNameRe = /^(?!(\/\/|\/\*))[^\r\n]*\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\s*{/gm;
 
-	context.subscriptions.push(disposable);
+const text = `
+//class IgnoredClass {}
+/* 
+  class AnotherIgnoredClass {}
+*/
+public class MyClass {
 }
 
-// This method is called when your extension is deactivated
+// class IgnoredInSingleLineComment {}
+
+/* class
+   IgnoredInMultiLineComment {}
+*/
+
+public class ValidClass {
+}
+`;
+
+import * as vscode from 'vscode';
+
+export function activate(context: vscode.ExtensionContext) {
+    console.log('Congratulations, your extension "confirma-testadapter" is now active!');
+
+    const disposable = vscode.commands.registerCommand('confirma-testadapter.helloWorld', () => {
+        let match;
+        while ((match = CSharpClassNameRe.exec(text)) !== null) {
+            console.info(match[2]);
+        }
+
+    context.subscriptions.push(disposable);
+	});
+}
+
 export function deactivate() {}
