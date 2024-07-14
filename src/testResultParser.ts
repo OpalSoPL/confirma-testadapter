@@ -1,24 +1,10 @@
+import {ETestStatus, ITestCase, ITestClass} from './Interfaces';
+
 const TerminalInfoRe = /^([0-9]+) passed, ([0-9]+) failed, ([0-9]+) ignored, ([0-9]+) warnings/;
-const TerminalClsRe =  /^\> ([A-Za-z]+)\.\.\./ ;
+const TerminalClsRe =  /^\> ([A-Za-z0-9]+)\.\.\./ ;
 const TerminalItemResultRe = /^\| ([A-Za-z0-9]+)\.\.\. (passed|failed|ignored)/;
 //todo regex for failed test info
 
-interface ITestClass {
-    className:string,
-    tests:ITestCase[]
-}
-
-interface ITestCase {
-    itemName:string,
-    status:ETestStatus
-}
-
-enum ETestStatus {
-    Passed,
-    Failed,
-    Ignored,
-    Unknown
-}
 
 export const parseResult = (text: string) => {
     const lines = text.split('\n');
@@ -30,7 +16,7 @@ export const parseResult = (text: string) => {
     let ignored = 0;
     let warnings = 0;
 
-    let testedClasses: ITestClass[] = [];
+    let testedClasses: ITestClass[]= [];
 
     for (let lineNo = 0; lineNo < lines.length; lineNo++) {
         const line = lines[lineNo].trim();

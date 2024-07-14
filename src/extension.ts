@@ -1,7 +1,32 @@
-const CSharpClassNameRe = /^(?!(\/\/|\/\*))[^\r\n]*\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\s*{/gm;
+const test1 = `
+using Confirma.Attributes;
+using Confirma.Extensions;
 
-const classHeader = "[TestClass]";
-const itemHeader = "[TestCase]";
+[TestClass]
+[Parallelizable]
+public static class BlablaTest
+{
+    [TestCase]
+    public static void Idk()
+    {
+        8.ConfirmInRange(1,5);
+    }
+
+    [TestCase]
+
+
+    public static void Idk1()
+    {
+        1.ConfirmInRange(1,5);
+    }
+
+        [TestCase]
+    public static void Idk2()
+    {
+        5.ConfirmInRange(1,5);
+    }
+}
+`;
 
 const text = `
 Godot Engine v4.2.2.stable.mono.official.15073afe3 - https://godotengine.org
@@ -28,21 +53,23 @@ WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
 
 import * as vscode from 'vscode';
 import { parseResult } from './testResultParser';
+import { parseFile } from './testFileParser';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "confirma-testadapter" is now active!');
 
     const disposable = vscode.commands.registerCommand('confirma-testadapter.helloWorld', () => {
-        const result = parseResult(text);
-        vscode.window.showInformationMessage(`Test results: ${result.passed} passed, ${result.failed} failed, ${result.ignored} ignored, ${result.warnings} warnings.`
-            );
-        result.testedClasses.forEach(element => {
-            console.info(`> ${element.className}`);
+        parseFile(test1);
+        // const result = parseResult(text);
+        // vscode.window.showInformationMessage(`Test results: ${result.passed} passed, ${result.failed} failed, ${result.ignored} ignored, ${result.warnings} warnings.`
+        //     );
+        // result.testedClasses.forEach(element => {
+        //     console.info(`> ${element.className}`);
 
-            element.tests.forEach(element => {
-                console.info(`| ${element.itemName}:${element.status}`);
-            });
-        });
+        //     element.tests.forEach(element => {
+        //         console.info(`| ${element.itemName}:${element.status}`);
+        //     });
+       // });
     context.subscriptions.push(disposable);
 	});
 }
