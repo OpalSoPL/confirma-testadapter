@@ -3,6 +3,7 @@ using Confirma.Attributes;
 using Confirma.Extensions;
 
 [TestClass]
+
 [Parallelizable]
 public static class BlablaTest
 {
@@ -59,7 +60,17 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Congratulations, your extension "confirma-testadapter" is now active!');
 
     const disposable = vscode.commands.registerCommand('confirma-testadapter.helloWorld', () => {
-        parseFile(test1);
+        const Tests = parseFile(test1);
+
+        Tests.forEach(element => {
+
+            console.info(element.className);
+            element.tests.forEach(element => {
+                console.info(">",element.itemName);
+            });
+        });
+
+
         // const result = parseResult(text);
         // vscode.window.showInformationMessage(`Test results: ${result.passed} passed, ${result.failed} failed, ${result.ignored} ignored, ${result.warnings} warnings.`
         //     );

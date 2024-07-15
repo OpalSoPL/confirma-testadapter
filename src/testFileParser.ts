@@ -1,7 +1,7 @@
-import { ITestClass } from "./Interfaces";
+import { ETestStatus, ITestCase, ITestClass } from "./Interfaces";
 
 const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
-const CSharpMethodNameRe = /\b(public|private|internal|protected|void)\s*s*\b(async)?\s*\b(static|virtual|abstract|void)?\s*\b(async)?\b(Task)?\s*[a-zA-Z]*(?<method>\s[A-Za-z_][A-Za-z_0-9]*\s*)\((([a-zA-Z\[\]\<\>]*\s*[A-Za-z_][A-Za-z_0-9]*\s*)[,]?\s*)+\)/
+const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?[a-zA-Z]*(?<method>\s[A-Za-z_][A-Za-z_0-9]*\s*)/;
 
 const classHeader = /^\[TestClass\]/;
 const itemHeader = /^\[TestCase\]/;
@@ -11,7 +11,7 @@ export const parseFile = (text: string) => {
     let testClassFlag = false;
     let testCaseFlag = false;
 
-    let TestClasses: ITestClass[];
+    let TestClasses: ITestClass[] = [];
 
     const lines = text.split('\n');
 
@@ -34,6 +34,20 @@ export const parseFile = (text: string) => {
         const classMatch = line.match(CSharpClassNameRe);
         if (classMatch && testClassFlag) {
             let className = classMatch[1];
+            let newClass: ITestClass = {className, tests: []};
+
+            TestClasses.push(newClass);
+            testClassFlag = false;
+            continue;
+        }
+
+        const itemMatch = line.match(CSharpMethodNameRe);
+        if (itemMatch && testCaseFlag && TestClasses.length > 0) {
+            let itemName = itemMatch[5];
+            let newitem : ITestCase =  {itemName, status: ETestStatus.Unknown};
+
+            TestClasses[TestClasses.length-1].tests.push(newitem);
         }
     }
+    return TestClasses;
 };
