@@ -1,4 +1,5 @@
 import { ETestStatus, ITestCase, ITestClass } from "./Interfaces";
+import * as vscode from 'vscode';
 
 const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
 const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?[a-zA-Z]*(?<method>\s[A-Za-z_][A-Za-z_0-9]*\s*)/;
@@ -6,7 +7,9 @@ const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)
 const classHeader = /^\[TestClass\]/;
 const itemHeader = /^\[TestCase\]/;
 
-export const parseFile = (text: string) => {
+export const parseFile = (text: string, events: {
+    onTest(range: vscode.Range, name:string/*, expected: ?*/): void
+}) => {
     //console.info(text);
     let testClassFlag = false;
     let testCaseFlag = false;

@@ -10,7 +10,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onWorkspaceFoldersChanged",
+    "onLanguage:csharp"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [

@@ -1,88 +1,59 @@
-const test1 = `
-using Confirma.Attributes;
-using Confirma.Extensions;
-
-[TestClass]
-
-[Parallelizable]
-public static class BlablaTest
-{
-    [TestCase]
-    public static void Idk()
-    {
-        8.ConfirmInRange(1,5);
-    }
-
-    [TestCase]
-
-
-    public static void Idk1()
-    {
-        1.ConfirmInRange(1,5);
-    }
-
-        [TestCase]
-    public static void Idk2()
-    {
-        5.ConfirmInRange(1,5);
-    }
-}
-`;
-
-const text = `
-Godot Engine v4.2.2.stable.mono.official.15073afe3 - https://godotengine.org
- 
-/root/ActionHandler
-/root/ActionHandler
-/root/ActionHandler
-/root/ActionHandler
-/root/ActionHandler
-/root/ActionHandler
-> BlablaTest...
-| Idk... failed.
-- Expected 8 to be within the range [1, 5].
-| Idk1... passed.
-| Idk2... passed.
-> AnotherTest...
-| Test... passed.
-
-Confirma ran 3 tests in 1 test classes. Tests took 0,0460924s.
-2 passed, 1 failed, 0 ignored, 0 warnings.
-WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
-     at: cleanup (core/object/object.cpp:2209)
-`;
-
 import * as vscode from 'vscode';
-import { parseResult } from './testResultParser';
 import { parseFile } from './testFileParser';
+import { ITestClass, ITestCase, ETestStatus } from './Interfaces';
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "confirma-testadapter" is now active!');
+    const testCtrl = vscode.tests.createTestController('confirmaTestControler', "Confirma");
+    context.subscriptions.push(testCtrl);
 
-    const disposable = vscode.commands.registerCommand('confirma-testadapter.helloWorld', () => {
-        const Tests = parseFile(test1);
 
-        Tests.forEach(element => {
+    const discoverTests = async () => {
+        const testFiles = await vscode.workspace.findFiles('**/*.cs');
 
-            console.info(element.className);
-            element.tests.forEach(element => {
-                console.info(">",element.itemName);
+        for (const file of testFiles) {
+            const document = await vscode.workspace.openTextDocument(file);
+            const testClasses = parseFile(document.getText(), {
+                onTest: (range, name) => {
+                    
+                }
             });
-        });
 
+            for (const testClass of testClasses) {
+                const classItem = testCtrl.createTestItem(testClass.className, testClass.className, file);
+                testCtrl.items.add(classItem);
 
-        // const result = parseResult(text);
-        // vscode.window.showInformationMessage(`Test results: ${result.passed} passed, ${result.failed} failed, ${result.ignored} ignored, ${result.warnings} warnings.`
-        //     );
-        // result.testedClasses.forEach(element => {
-        //     console.info(`> ${element.className}`);
+                for (const testCase of testClass.tests) {
+                    const testItem = testCtrl.createTestItem(testCase.itemName, testCase.itemName, file);
+                    classItem.children.add(testItem);
+                }
+            }
+        }
+    };
 
-        //     element.tests.forEach(element => {
-        //         console.info(`| ${element.itemName}:${element.status}`);
-        //     });
-       // });
-    context.subscriptions.push(disposable);
-	});
+    //Discover tests on activation
+    discoverTests();
+
+    //Watch for changes in the workspace
+    const fileWatcher = vscode.workspace.createFileSystemWatcher('**/*.cs');
+    fileWatcher.onDidChange(discoverTests);
+    fileWatcher.onDidCreate(discoverTests);
+    fileWatcher.onDidDelete(discoverTests);
+
+    context.subscriptions.push(fileWatcher);
+
+    testCtrl.createRunProfile(
+        'Run Tests',
+        vscode.TestRunProfileKind.Run,
+        async (request, token) => {
+            const run = testCtrl.createTestRun(request);
+            request.include?.forEach(test => {
+                run.started(test);
+                run.skipped(test); //do nothing
+            });
+            run.end();
+        },
+        true
+    );
 }
 
 export function deactivate() {}
