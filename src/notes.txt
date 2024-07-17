@@ -5,3 +5,5 @@ $GODOT --headless -- --confirma-quit --confirma-run --confirma-verbose //run tes
 ERROR: Command line option --build-solutions was passed, but the build callback failed. Aborting.
 //emit error:
 build error
+
+//useful site: https://regex101.com/

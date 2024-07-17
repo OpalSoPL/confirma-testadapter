@@ -1,9 +1,9 @@
 {
   "name": "confirma-testadapter",
-  "publisher": "OpalSoPL",
-  "displayName": "confirma testadapter",
-  "description": "",
-  "version": "0.0.0",
+  "publisher": "OpalSoPLdev",
+  "displayName": "Confirma Test Adapter",
+  "description": "Test Adapter for Confirma",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.91.0"
   },
@@ -18,8 +18,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "confirma-testadapter.helloWorld",
-        "title": "Hello World"
+        "command": "confirma-testadapter.buildProject",
+        "title": "Build Godot Project"
       }
     ]
   },

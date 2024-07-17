@@ -12,11 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         for (const file of testFiles) {
             const document = await vscode.workspace.openTextDocument(file);
-            const testClasses = parseFile(document.getText(), {
-                onTest: (range, name) => {
-                    
-                }
-            });
+            const testClasses = parseFile(document.getText());
 
             for (const testClass of testClasses) {
                 const classItem = testCtrl.createTestItem(testClass.className, testClass.className, file);
