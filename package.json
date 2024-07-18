@@ -16,12 +16,6 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "confirma-testadapter.buildProject",
-        "title": "Build Godot Project"
-      }
-    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

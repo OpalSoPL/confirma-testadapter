@@ -1,11 +1,16 @@
 import * as vscode from 'vscode';
 import { parseFile } from './testFileParser';
+import * as runner from './runner';
 import { ITestClass, ITestCase, ETestStatus } from './Interfaces';
 
 export function activate(context: vscode.ExtensionContext) {
     const testCtrl = vscode.tests.createTestController('confirmaTestControler', "Confirma");
     context.subscriptions.push(testCtrl);
 
+    let workspacePath = "";
+    if (vscode.workspace.workspaceFolders !== undefined) {
+        workspacePath = vscode.workspace.workspaceFolders[0].uri.path;
+    }
 
     const discoverTests = async () => {
         const testFiles = await vscode.workspace.findFiles('**/*.cs');
@@ -35,6 +40,9 @@ export function activate(context: vscode.ExtensionContext) {
     fileWatcher.onDidCreate(discoverTests);
     fileWatcher.onDidDelete(discoverTests);
 
+    //create instance of testrunner
+    const testRunner = new runner.TestRunner();
+
     context.subscriptions.push(fileWatcher);
 
     testCtrl.createRunProfile(
@@ -42,9 +50,28 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.TestRunProfileKind.Run,
         async (request, token) => {
             const run = testCtrl.createTestRun(request);
+
+            //build project
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "build in progress",
+                cancellable: true
+            },
+            () => {
+                return testRunner.build(workspacePath)
+                    .then(status => {
+                        if (!status) {
+                            vscode.window.showErrorMessage("build error");
+                            run.end();
+                            return;
+                        }
+                    });
+            });
+
+            
             request.include?.forEach(test => {
                 run.started(test);
-                run.skipped(test); //do nothing
+                run.passed(test); //do nothing
             });
             run.end();
         },
