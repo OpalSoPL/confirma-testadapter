@@ -28,7 +28,6 @@ export const parseFile = (text: string) => {
         const classAtributeMatch = line.match(classHeader);
         if (classAtributeMatch) {
             testClassFlag = true;
-            console.info(1);
         }
         //console.info(testClassFlag,lineNo);
 
@@ -44,7 +43,8 @@ export const parseFile = (text: string) => {
 
         const itemMatch = line.match(CSharpMethodNameRe);
         if (itemMatch && testCaseFlag && TestClasses.length > 0) {
-            let itemName = itemMatch[5];
+            let itemName = itemMatch[6];
+
             let newitem : ITestCase =  {itemName, status: ETestStatus.Unknown};
 
             TestClasses[TestClasses.length-1].tests.push(newitem);
