@@ -1,8 +1,8 @@
 import {ETestStatus, ITestCase, ITestClass} from './Interfaces';
 
-const TerminalInfoRe = /^([0-9]+) passed, ([0-9]+) failed, ([0-9]+) ignored, ([0-9]+) warnings/;
-const TerminalClsRe =  /^\> ([A-Za-z0-9]+)\.\.\./ ;
-const TerminalItemResultRe = /^\| ([A-Za-z0-9_]+)(\([\[\],a-zA-Z1-9\.\b ]+\))*\.\.\. (passed|failed|ignored)./;
+const TerminalInfoRe = /([0-9]+) passed, ([0-9]+) failed, ([0-9]+) ignored, ([0-9]+) warnings/;
+const TerminalClsRe =  /\> ([A-Za-z0-9]+)\.\.\./ ;
+const TerminalItemResultRe = /\| ([A-Za-z0-9_]+)(\([\[\],a-zA-Z1-9\.\b ]+\))*\.\.\. (passed|failed|ignored)./;
 const TerminalFailReasonRe = /\- ([A-Za-z\s'1-9_]+)\./;
 
 

@@ -1,5 +1,5 @@
 $GODOT --build-solutions --headless --quit //build project and exit
-$GODOT --headless -- --confirma-quit --confirma-run --confirma-verbose //run tests
+$GODOT --headless -- --confirma-quit --confirma-run=CLASSNAME --confirma-verbose --confirma-method=METHODNAME //run tests
 
 //if
 ERROR: Command line option --build-solutions was passed, but the build callback failed. Aborting.

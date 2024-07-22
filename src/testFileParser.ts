@@ -2,7 +2,7 @@ import { ETestStatus, ITestCase, ITestClass } from "./Interfaces";
 import * as vscode from 'vscode';
 
 const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
-const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))[a-zA-Z]*(?<method>\s[A-Za-z_][A-Za-z_0-9]*\s*)/;
+const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))([a-zA-Z|void]+)\s(?<method>[A-Za-z_][A-Za-z_0-9]+)/;
 
 const classHeader = /\[TestClass\]/;
 const itemHeader = /\[TestCase\]/;
@@ -43,7 +43,14 @@ export const parseFile = (text: string) => {
 
         const itemMatch = line.match(CSharpMethodNameRe);
         if (itemMatch && testCaseFlag && TestClasses.length > 0) {
-            let itemName = itemMatch[6];
+
+            let itemName;
+            if (itemMatch.groups) {
+                    itemName = itemMatch.groups.method;
+                }
+            else {
+                itemName = "";
+            }
 
             let newitem : ITestCase =  {itemName, status: ETestStatus.Unknown};
 
