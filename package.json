@@ -29,6 +29,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "measure-time": "5.0.8",
     "@types/vscode": "^1.91.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",

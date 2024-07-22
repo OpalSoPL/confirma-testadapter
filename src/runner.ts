@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { parseResult } from "./testResultParser";
 import * as vscode from "vscode";
+import { measureTime } from 'measure-time';
 
 const CompileErrRe = /ERROR: Command line option --build-solutions was passed, but the build callback failed\. Aborting\./;
 const buildCommand = '"$GODOT" --build-solutions --headless --quit';
@@ -94,6 +95,8 @@ export class TestRunner {
     async run(item:vscode.TestItem, run:vscode.TestRun ,path:string)
     {
         run.started(item);
+        const getElapsed = measureTime();
+
         if (item.parent === undefined) {
             item.children.forEach((ChildItem) => {
                 this.run(ChildItem,run,path).then(state => {
@@ -135,7 +138,7 @@ export class TestRunner {
                 console.log(results);
 
                 if (results.failed > 0 || results.warnings > 0) {
-                    run.failed(item,new vscode.TestMessage("NOT IMPLEMENTED YET"));
+                    run.failed(item,new vscode.TestMessage("NOT IMPLEMENTED YET"),getElapsed().millisecondsTotal);
                     resolve(false);
                 }
                 else if (results.ignored > 0) {
@@ -144,7 +147,7 @@ export class TestRunner {
                 }
                 else{
                     console.log(item);
-                    run.passed(item);
+                    run.passed(item,getElapsed().millisecondsTotal);
                     resolve(true);
                 }
             });
