@@ -2,10 +2,10 @@
 
 ## supported versions of Confirma
 
-| confirma version | supported? (*last version*)  |
-| ---------------- | ---------------------------- |
-| 0.6.x beta       | :x:                          |
-| 0.7.x beta       | :white_check_mark: (*0.1.x*) |
+| confirma version        | supported? (*last version*)  |
+| ----------------------- | ---------------------------- |
+| 0.6.x beta *or earlier* | :x:                          |
+| 0.7.x beta              | :white_check_mark: (*0.1.x*) |
 
 This is the README for your extension "confirma-testadapter". After writing up a brief description, we recommend including the following sections.
 
