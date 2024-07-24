@@ -12,7 +12,9 @@
   ],
   "activationEvents": [
     "onWorkspaceFoldersChanged",
-    "onLanguage:csharp"
+    "onLanguage:csharp",
+    "workspaceContains:project.godot",
+    "workspaceContains:/addons/confirma"
   ],
   "main": "./dist/extension.js",
   "contributes": {

@@ -2,12 +2,13 @@ import { exec } from "child_process";
 import { parseResult } from "./testResultParser";
 import * as vscode from "vscode";
 import { measureTime } from 'measure-time';
+import { ITestCase } from "./Interfaces";
 
 const CompileErrRe = /ERROR: Command line option --build-solutions was passed, but the build callback failed\. Aborting\./;
 const buildCommand = '"$GODOT" --build-solutions --headless --quit';
 
 
-export const  testConfiguration = async (request:vscode.TestRunRequest,token:vscode.CancellationToken,testCtrl: vscode.TestController) => {
+export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:vscode.CancellationToken,testCtrl: vscode.TestController) => {
     const testRunner = new TestRunner;
     const run = testCtrl.createTestRun(request);
 
@@ -135,10 +136,16 @@ export class TestRunner {
                 log=removeColors(log);
                 const results = parseResult(log);
 
+                console.log(log);
                 console.log(results);
+                if (!results) {
+                    resolve(false);
+                    run.skipped(item);
+                    return;
+                }
 
-                if (results.failed > 0 || results.warnings > 0) {
-                    run.failed(item,new vscode.TestMessage("NOT IMPLEMENTED YET"),getElapsed().millisecondsTotal);
+                if (results.failed.count > 0 || results.warnings > 0) {
+                    run.failed(item,new vscode.TestMessage(getErrorMessage(results.failed.map)),getElapsed().millisecondsTotal);
                     resolve(false);
                 }
                 else if (results.ignored > 0) {
@@ -150,6 +157,13 @@ export class TestRunner {
                     run.passed(item,getElapsed().millisecondsTotal);
                     resolve(true);
                 }
+                // if (item.range && item.uri) {
+                //     run.appendOutput(replaceLFwithCRLF(log),,item);
+                // }
+
+                //else {
+                //    run.appendOutput(replaceLFwithCRLF(log));
+                //}
             });
         });
     }
@@ -159,4 +173,19 @@ export class TestRunner {
 const removeColors = (text: string) => {
     const ansiEscape = /\x1b\[[0-9;]*m/g;
     return text.replace(ansiEscape, '');
+};
+
+function replaceLFwithCRLF (text: string) {
+    const lfEscape = /\n/g;
+    return text.replace(lfEscape,"\r\n");
+}
+
+function getErrorMessage (map:Map <ITestCase,string>) :string {
+    let errorMessage = "";
+
+    map.forEach((value,key) => {
+        errorMessage += `${key.itemName}${key.args}: ${value}\r\n`;
+    });
+
+    return errorMessage;
 }

@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(testCtrl);
 
     const discoverTests = async () => {
-        const testFiles = await vscode.workspace.findFiles('**/*.cs');
+        const testFiles = await vscode.workspace.findFiles('**/*.cs','{**/.godot/**,**/addons/**}');
 
         for (const file of testFiles) {
             const document = await vscode.workspace.openTextDocument(file);
@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
     testCtrl.createRunProfile(
         'Run Tests',
         vscode.TestRunProfileKind.Run,
-        async (request,token) => {await runner.testConfiguration(request,token,testCtrl);},
+        async (request,token) => {await runner.testConfigurationRun(request,token,testCtrl);},
         true);
 }
 

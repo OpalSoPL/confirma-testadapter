@@ -7,6 +7,7 @@ export interface ITestClass {
 export interface ITestCase {
     itemName:string,
     status:ETestStatus
+    args?:string | undefined;
 }
 
 export enum ETestStatus {
