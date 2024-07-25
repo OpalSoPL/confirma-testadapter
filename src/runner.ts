@@ -1,16 +1,21 @@
 import { exec } from "child_process";
 import { parseResult } from "./testResultParser";
 import * as vscode from "vscode";
-import { measureTime } from 'measure-time';
-import { ITestCase } from "./Interfaces";
+import { ETestStatus, ITestCase } from "./Interfaces";
 
 const CompileErrRe = /ERROR: Command line option --build-solutions was passed, but the build callback failed\. Aborting\./;
 const buildCommand = '"$GODOT" --build-solutions --headless --quit';
 
 
 export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:vscode.CancellationToken,testCtrl: vscode.TestController) => {
-    const testRunner = new TestRunner;
     const run = testCtrl.createTestRun(request);
+
+    let workspacePath = "";
+    if (vscode.workspace.workspaceFolders !== undefined) {
+        workspacePath = vscode.workspace.workspaceFolders[0].uri.path;
+    }
+
+    const testRunner = new TestRunner (run,workspacePath);
 
     try {
         let workspacePath = "";
@@ -39,11 +44,18 @@ export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:
 
 
         //run tests in project
-        if (request.include)
-            {
-                const testPromises = request.include?.map(test => testRunner.run(test,run,workspacePath));
-                await Promise.all(testPromises);
-            }
+        const testPromises: Promise<any>[] = [];
+        if (request.include){
+
+            request.include?.map(test => {
+                const promise =testRunner.runTests(test);
+                testPromises.push(promise);
+            });
+        }
+        else {
+            //testRunner.runEverything();
+        }
+        await Promise.all(testPromises);
     }
     finally {
         run.end();
@@ -54,36 +66,32 @@ export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:
 
 
 export class TestRunner {
+
+    run: vscode.TestRun;
+    workspacePath: string;
+
+    constructor(run:vscode.TestRun, workspacePath:string)
+    {
+        this.run = run;
+        this.workspacePath = workspacePath;
+    }
+
     /**
      *
      * @param path - path of directory containing file `project.godot`
      * @returns status of build
      * @since 0.1.0 - beta
      */
-    async build(path:string)
-    {
-        let log:string = "";
-
-        const options = {
-            cwd: path
-        };
-
+    async build(path:string) {
         return new Promise((resolve) => {
-            exec(buildCommand,options,(error,stdout,stderr) => {
-                log += stdout + "\n";
-                log += stderr + "\n";
+            exec(buildCommand,{cwd: path},(e,stdout,stderr) => {
+                const log=getExecLog(stdout,stderr);
 
-                if (error!==null) {
-                    log += error + "\n";
-                    console.log(log);
-                    resolve(true);
+                const errorMatch=log.match(CompileErrRe);
+                if (errorMatch) {
+                    return resolve(false);
                 }
-                if (log.match(CompileErrRe)) {
-                    resolve(false);
-                } else {
-                    resolve(true);
-                    console.log("done");
-                }
+                return resolve(true);
             });
         });
     }
@@ -93,84 +101,109 @@ export class TestRunner {
      * @param path - path of directory containing file `project.godot`
      * @since 0.1.0 - beta
      */
-    async run(item:vscode.TestItem, run:vscode.TestRun ,path:string)
+    async runTests(item:vscode.TestItem)
     {
-        run.started(item);
-        const getElapsed = measureTime();
+        let testPromise:Promise<any>;
+        //check if item is class
+        if (item.parent === undefined) {testPromise = this.runClass(item);}
+        else {testPromise = this.runMethod(item);}
+        return testPromise;
+    }
 
-        if (item.parent === undefined) {
-            item.children.forEach((ChildItem) => {
-                this.run(ChildItem,run,path).then(state => {
-                    if (!state){
-                        run.failed(item,new vscode.TestMessage(""));
-                    }
-                });
-            });
-            const itemPromises: Promise<any>[] = [];
-            item.children.forEach(item =>
-                {
-                    itemPromises.push(this.run(item,run,path));
-                });
+    async runEverything () {
+    }
 
-            await Promise.all(itemPromises);
-            return Promise.resolve();
-        }
-
-        const parentClass = item.parent.id;
-        const methodName = item.id;
-
-        
-        const runCommand = `"$GODOT" --headless -- --confirma-run=${parentClass} --confirma-method=${methodName} --confirma-verbose --confirma-quit`;
-        console.log(runCommand);
+    async runClass (item:vscode.TestItem) {
+        const className = item.id;
+        const runCommand = `"$GODOT" --headless -- --confirma-run=${className} --confirma-verbose --confirma-quit`;
 
         return new Promise((resolve) => {
-
-            const options = {
-                cwd: path
-            };
-            exec (runCommand,options,(error,stdout,stderr) => {
-                let log = "";
-                log += stdout + "\n";
-                log += stderr + "\n";
-                
-                log=removeColors(log);
+            this.run.started(item);
+            exec (runCommand,{cwd: this.workspacePath},(error,stdout,stderr) => {
+                const log = getExecLog(stderr,stdout,{color: false});
                 const results = parseResult(log);
 
-                console.log(log);
-                console.log(results);
                 if (!results) {
-                    resolve(false);
-                    run.skipped(item);
+                    this.run.skipped(item);
                     return;
                 }
 
-                if (results.failed.count > 0 || results.warnings > 0) {
-                    run.failed(item,new vscode.TestMessage(getErrorMessage(results.failed.map)),getElapsed().millisecondsTotal);
-                    resolve(false);
-                }
-                else if (results.ignored > 0) {
-                    run.skipped(item);
-                    resolve(true);
-                }
-                else{
-                    console.log(item);
-                    run.passed(item,getElapsed().millisecondsTotal);
-                    resolve(true);
-                }
-                // if (item.range && item.uri) {
-                //     run.appendOutput(replaceLFwithCRLF(log),,item);
-                // }
+                results.testedClasses[0].tests.forEach((value) => {
+                    const child = item.children.get(value.itemName);
+                    value.status;
 
-                //else {
-                //    run.appendOutput(replaceLFwithCRLF(log));
-                //}
+                    if (!child) {console.error(`child: ${value.itemName}, not found`); return;}
+                    value.status;
+                    switch(value.status){
+                        case ETestStatus.Failed:
+                            this.run.failed(child,this.getErrorMessage(results.failed,));
+                            break;
+                        case ETestStatus.Ignored:
+                            this.run.skipped(child);
+                            break;
+                        case ETestStatus.Passed:
+                            this.run.passed(child);
+                            break;
+                        default:
+                            this.run.skipped;
+                    }
+                    resolve (true);
+                });
             });
         });
     }
+
+    async runMethod (item: vscode.TestItem) {
+        const parentClass = item.parent?.id;
+        const methodName = item.id;
+        const runCommand = `"$GODOT" --headless -- --confirma-run=${parentClass} --confirma-method=${methodName} --confirma-verbose --confirma-quit`;
+
+        return new Promise((resolve) => {
+            this.run.started(item);
+            exec (runCommand,{cwd: this.workspacePath},(error,stdout,stderr) => {
+                const log = getExecLog(stderr,stdout,{color:false});
+                const results = parseResult(log);
+
+                if (!results) {
+                    this.run.skipped(item);
+                    resolve (true);
+                    return;
+                }
+
+                if (results.warnings > 0 || results.failed.count > 0) {
+                    const errorMessage = this.getErrorMessage (results.failed);
+                    this.run.failed(item,errorMessage);
+                }
+                else if (results.ignored) {this.run.skipped(item);}
+                else {this.run.passed(item);}
+                resolve (true);
+            });
+        });
+    }
+
+    getErrorMessage (results:{map:Map <ITestCase,string>},targetID?:string) :vscode.TestMessage {
+        let errorMessage = "";
+        
+        results.map.forEach((value,key) => {
+            if ((targetID && key.itemName === targetID) || !targetID) {
+                errorMessage += `${key.itemName}${key.args}: ${value}\r\n`;
+            }
+        });
+        
+        return new vscode.TestMessage(errorMessage);
+    }
 }
 
+function getExecLog(stderr:string,stdout:string,options?:{color?:boolean,CRLF?:boolean}) {
+    let log = "";
+    log += stdout + "\n";
+    log += stderr + "\n";
+    if (!options?.color) {log=removeColors(log);}
+    if (options?.CRLF) {log=replaceLFwithCRLF(log);}
+    return log;
+}
 
-const removeColors = (text: string) => {
+function removeColors (text: string) {
     const ansiEscape = /\x1b\[[0-9;]*m/g;
     return text.replace(ansiEscape, '');
 };
@@ -178,14 +211,4 @@ const removeColors = (text: string) => {
 function replaceLFwithCRLF (text: string) {
     const lfEscape = /\n/g;
     return text.replace(lfEscape,"\r\n");
-}
-
-function getErrorMessage (map:Map <ITestCase,string>) :string {
-    let errorMessage = "";
-
-    map.forEach((value,key) => {
-        errorMessage += `${key.itemName}${key.args}: ${value}\r\n`;
-    });
-
-    return errorMessage;
 }

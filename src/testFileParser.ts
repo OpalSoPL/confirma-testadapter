@@ -52,7 +52,7 @@ export const parseFile = (text: string) => {
                 itemName = "";
             }
 
-            let newitem : ITestCase =  {itemName, status: ETestStatus.Unknown};
+            let newitem : ITestCase =  {itemName};
 
             TestClasses[TestClasses.length-1].tests.push(newitem);
         }

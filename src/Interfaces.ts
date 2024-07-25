@@ -6,7 +6,7 @@ export interface ITestClass {
 
 export interface ITestCase {
     itemName:string,
-    status:ETestStatus
+    status?:ETestStatus
     args?:string | undefined;
 }
 
