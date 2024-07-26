@@ -44,16 +44,15 @@ export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:
 
 
         //run tests in project
-        const testPromises: Promise<any>[] = [];
+        let testPromises: Promise<any>[] = [];
         if (request.include){
-
             request.include?.map(test => {
                 const promise =testRunner.runTests(test);
                 testPromises.push(promise);
             });
         }
         else {
-            //testRunner.runEverything();
+            testPromises = testRunner.runEverything(testCtrl);
         }
         await Promise.all(testPromises);
     }
@@ -110,47 +109,21 @@ export class TestRunner {
         return testPromise;
     }
 
-    async runEverything () {
+    async runEverything (testController: vscode.TestController) {
+        const testPromises:Promise<any>[]=[];
+        const tests = testController.items;
+        tests.forEach(item => {
+            testPromises.push(this.runClass(item));
+        });
+        await Promise.all(testPromises);
+        return new Promise((resolve)=>{resolve(true);});
     }
 
     async runClass (item:vscode.TestItem) {
         const className = item.id;
         const runCommand = `"$GODOT" --headless -- --confirma-run=${className} --confirma-verbose --confirma-quit`;
-
-        return new Promise((resolve) => {
-            this.run.started(item);
-            exec (runCommand,{cwd: this.workspacePath},(error,stdout,stderr) => {
-                const log = getExecLog(stderr,stdout,{color: false});
-                const results = parseResult(log);
-
-                if (!results) {
-                    this.run.skipped(item);
-                    return;
-                }
-
-                results.testedClasses[0].tests.forEach((value) => {
-                    const child = item.children.get(value.itemName);
-                    value.status;
-
-                    if (!child) {console.error(`child: ${value.itemName}, not found`); return;}
-                    value.status;
-                    switch(value.status){
-                        case ETestStatus.Failed:
-                            this.run.failed(child,this.getErrorMessage(results.failed,));
-                            break;
-                        case ETestStatus.Ignored:
-                            this.run.skipped(child);
-                            break;
-                        case ETestStatus.Passed:
-                            this.run.passed(child);
-                            break;
-                        default:
-                            this.run.skipped;
-                    }
-                    resolve (true);
-                });
-            });
-        });
+        
+        this.ExecuteTest(item,runCommand);
     }
 
     async runMethod (item: vscode.TestItem) {
@@ -177,6 +150,41 @@ export class TestRunner {
                 else if (results.ignored) {this.run.skipped(item);}
                 else {this.run.passed(item);}
                 resolve (true);
+            });
+        });
+    }
+
+    ExecuteTest (item: vscode.TestItem,runCommand:string) {
+        return new Promise((resolve) => {
+            this.run.started(item);
+            exec (runCommand,{cwd: this.workspacePath},(error,stdout,stderr) => {
+                const log = getExecLog(stderr,stdout,{color: false});
+                const results = parseResult(log);
+
+                if (!results) {
+                    this.run.skipped(item);
+                    return;
+                }
+
+                results.testedClasses[0].tests.forEach((value) => {
+                    const child = item.children.get(value.itemName);
+
+                    if (!child) {console.error(`child: ${value.itemName}, not found`); return;}
+                    switch(value.status){
+                        case ETestStatus.Failed:
+                            this.run.failed(child,this.getErrorMessage(results.failed,));
+                            break;
+                        case ETestStatus.Ignored:
+                            this.run.skipped(child);
+                            break;
+                        case ETestStatus.Passed:
+                            this.run.passed(child);
+                            break;
+                        default:
+                            this.run.skipped;
+                    }
+                    resolve (true);
+                });
             });
         });
     }
