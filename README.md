@@ -1,4 +1,5 @@
-# confirma-testadapter README
+# Confirma test adapter
+This Extension adds ability to run Confirma unit tests.
 
 ## supported versions of Confirma
 
@@ -7,21 +8,16 @@
 | 0.6.x beta *or earlier* | :x:                          |
 | 0.7.x beta              | :white_check_mark: (*0.1.x*) |
 
-This is the README for your extension "confirma-testadapter". After writing up a brief description, we recommend including the following sections.
-
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+*add features of Extension*
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Extension requires:
+- Godot Engine Mono (C# support)
+- Project.godot in main directory of workspace
+- Godot Addon "Confirma" (0.7.0 beta or Higher) in /addons/ directory
 
 ## Extension Settings
 
