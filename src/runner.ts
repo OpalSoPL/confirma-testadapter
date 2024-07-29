@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { ETestStatus, ITestCase } from "./Interfaces";
 
 const CompileErrRe = /ERROR: Command line option --build-solutions was passed, but the build callback failed\. Aborting\./;
-const buildCommand = '"$GODOT" --build-solutions --headless --quit';
+const buildCommand = 'dotnet build';
 
 
 export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:vscode.CancellationToken,testCtrl: vscode.TestController) => {
