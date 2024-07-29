@@ -52,7 +52,7 @@ export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:
             });
         }
         else {
-            testPromises = testRunner.runEverything(testCtrl);
+            testPromises.push(testRunner.runEverything(testCtrl));
         }
         await Promise.all(testPromises);
     }
@@ -123,7 +123,7 @@ export class TestRunner {
         const className = item.id;
         const runCommand = `"$GODOT" --headless -- --confirma-run=${className} --confirma-verbose --confirma-quit`;
         
-        this.ExecuteTest(item,runCommand);
+        return this.ExecuteTest(item,runCommand);
     }
 
     async runMethod (item: vscode.TestItem) {
