@@ -18,6 +18,17 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration":[
+      {
+        "title": "confirma-testadapter",
+        "properties": {
+          "confirma-testadapter.godot-path":{
+            "type":["string","null"],
+            "default":null,
+            "description": "Specifies the path of the Godot binary. If empty, uses the $GODOT environment variable."
+          }}
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
