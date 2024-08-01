@@ -120,8 +120,10 @@ export class TestRunner {
     }
 
     async runClass (item:vscode.TestItem) {
+        const config = vscode.workspace.getConfiguration();
+        const godotPath = this.getGodotPath();
         const className = item.id;
-        const runCommand = `"$GODOT" --headless -- --confirma-run=${className} --confirma-verbose --confirma-quit`;
+        const runCommand = `${godotPath} --headless -- --confirma-run=${className} --confirma-verbose --confirma-quit`;
         
         return this.ExecuteTest(item,runCommand);
     }
@@ -129,7 +131,8 @@ export class TestRunner {
     async runMethod (item: vscode.TestItem) {
         const parentClass = item.parent?.id;
         const methodName = item.id;
-        const runCommand = `"$GODOT" --headless -- --confirma-run=${parentClass} --confirma-method=${methodName} --confirma-verbose --confirma-quit`;
+        const godotPath = this.getGodotPath();
+        const runCommand = `${godotPath} --headless -- --confirma-run=${parentClass} --confirma-method=${methodName} --confirma-verbose --confirma-quit`;
 
         return new Promise((resolve) => {
             this.run.started(item);
@@ -199,6 +202,17 @@ export class TestRunner {
         });
         
         return new vscode.TestMessage(errorMessage);
+    }
+
+    getGodotPath():string {
+        const config = vscode.workspace.getConfiguration();
+        const godotPath = config.get<string>("confirma-testadapter.godot-path");
+
+        if (godotPath) {
+            console.log(godotPath);
+            return godotPath;
+        }
+        return '"$GODOT"';
     }
 }
 
