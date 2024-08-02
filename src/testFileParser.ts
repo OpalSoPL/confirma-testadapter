@@ -5,7 +5,7 @@ const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
 const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))([a-zA-Z|void]+)\s(?<method>[A-Za-z_][A-Za-z_0-9]+)/;
 
 const classHeader = /\[TestClass\]/;
-const itemHeader = /\[TestCase\]/;
+const itemHeader = /\[TestCase(\(([A-z1-9\)\(\?\[\]\s\{\},"'][^\n]*)\))*\]/;
 
 export const parseFile = (text: string) => {
     //console.info(text);
