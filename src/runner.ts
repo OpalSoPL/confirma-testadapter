@@ -3,7 +3,6 @@ import { parseResult } from "./testResultParser";
 import * as vscode from "vscode";
 import { ETestStatus, ITestCase } from "./Interfaces";
 
-const CompileErrRe = /ERROR: Command line option --build-solutions was passed, but the build callback failed\. Aborting\./;
 const buildCommand = 'dotnet build';
 
 
@@ -57,6 +56,7 @@ export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:
         await Promise.all(testPromises);
     }
     finally {
+        console.log("end all");
         run.end();
         return;
     }
@@ -85,11 +85,6 @@ export class TestRunner {
         return new Promise((resolve) => {
             exec(buildCommand,{cwd: path},(e,stdout,stderr) => {
                 const log=getExecLog(stdout,stderr);
-
-                const errorMatch=log.match(CompileErrRe);
-                if (errorMatch) {
-                    return resolve(false);
-                }
                 return resolve(true);
             });
         });
@@ -116,7 +111,8 @@ export class TestRunner {
             testPromises.push(this.runClass(item));
         });
         await Promise.all(testPromises);
-        return new Promise((resolve)=>{resolve(true);});
+        console.log("Ev end");
+        return new Promise(resolve=>{resolve(true);});
     }
 
     async runClass (item:vscode.TestItem) {
@@ -163,16 +159,19 @@ export class TestRunner {
             exec (runCommand,{cwd: this.workspacePath},(error,stdout,stderr) => {
                 const log = getExecLog(stderr,stdout,{color: false});
                 const results = parseResult(log);
+                console.log(log);
+                console.log(results);
 
                 if (!results) {
                     this.run.skipped(item);
+                    resolve (true);
                     return;
                 }
 
                 results.testedClasses[0].tests.forEach((value) => {
                     const child = item.children.get(value.itemName);
 
-                    if (!child) {console.error(`child: ${value.itemName}, not found`); return;}
+                    if (!child) {console.error(`child: ${value.itemName}, not found`); resolve(true); return;}
                     switch(value.status){
                         case ETestStatus.Failed:
                             this.run.failed(child,this.getErrorMessage(results.failed,));
@@ -188,6 +187,7 @@ export class TestRunner {
                     }
                     resolve (true);
                 });
+                console.log(item.id,"done");
             });
         });
     }

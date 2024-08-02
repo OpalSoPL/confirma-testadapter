@@ -11,6 +11,6 @@ public class Test2 {
 
     [TestCase]
     public static void testCase231 () {
-        1.ConfirmEqual(2);
+        2.ConfirmEqual(2);
     }
 }

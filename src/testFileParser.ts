@@ -55,6 +55,7 @@ export const parseFile = (text: string) => {
             let newitem : ITestCase =  {itemName};
 
             TestClasses[TestClasses.length-1].tests.push(newitem);
+            testCaseFlag = false;
         }
     }
     return TestClasses;
