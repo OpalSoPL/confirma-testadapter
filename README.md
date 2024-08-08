@@ -3,10 +3,11 @@ This Extension adds ability to run Confirma unit tests.
 
 ## supported versions of Confirma
 
-| confirma version        | supported? (*last version*)  |
-| ----------------------- | ---------------------------- |
-| 0.6.x beta *or earlier* | :x:                          |
-| 0.7.x beta              | :white_check_mark: (*0.1.x*) |
+| confirma version        | supported? (*last version*)             |
+| ----------------------- | --------------------------------------- |
+| 0.6.x beta *or earlier* | :x:                                     |
+| 0.7.x beta              | :white_check_mark: (*0.1.x*)            |
+| 0.8.x beta *(probably)* | :white_check_mark: (*0.1.x - only c# *) |
 
 ## Features
 
