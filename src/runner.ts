@@ -105,7 +105,7 @@ export class TestRunner {
     }
 
     async runEverything (testController: vscode.TestController) {
-        const runCommand = `${this.getGodotPath()} --headless -- --confirma-run --confirma-verbose --confirma-quit`;
+        const runCommand = `${this.getGodotPath()} --headless -- --confirma-run --confirma-verbose --confirma-quit --confirma-sequential --confirma-disable-gd`; //--confirma-sequential is temp fix
         const testPromises:Promise<any>[]=[];
         const tests: Map<string,vscode.TestItem> = new Map();
         testController.items.forEach(item => {
