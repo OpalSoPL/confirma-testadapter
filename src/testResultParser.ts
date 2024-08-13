@@ -2,6 +2,7 @@
 import { Debug } from './debug';
 import {ETestStatus, ITestCase, ITestClass} from './Interfaces';
 import * as vscode from 'vscode';
+import { ParsedResult } from './ParsedResult';
 const TerminalInfoRe = /([0-9]+) passed, ([0-9]+) failed, ([0-9]+) ignored, ([0-9]+) warnings/;
 const TerminalClsRe =  /\> ([A-Za-z0-9]+)\.\.\./ ;
 const TerminalItemResultRe = /\| ([A-Za-z0-9_]+)(\([\[\]\{\}?,a-zA-Z0-9\.\b!\s\*\\\-\(\)\/_$]+\))*\.\.\. (passed|failed|ignored)./;
@@ -81,12 +82,8 @@ export const parseResult = (text: string) => {
         }
     }
     let debug:Debug = new Debug(testedClasses);
-    return {
-        passed,
-        failed,
-        ignored,
-        warnings,
-        testedClasses,
-        debug
-    };
+    const result =new ParsedResult(passed,ignored,warnings,failed,testedClasses);
+    result.debug = debug;
+
+    return result;
 };

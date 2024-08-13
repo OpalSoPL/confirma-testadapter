@@ -1,4 +1,4 @@
-//todo move to TestTree.ts or sth
+//todo move to separate files
 export interface ITestClass {
     className:string,
     tests:ITestCase[]
@@ -15,4 +15,10 @@ export enum ETestStatus {
     Failed,
     Ignored,
     Unknown
+}
+
+export enum ETestType {
+    All,
+    Class,
+    Method
 }
