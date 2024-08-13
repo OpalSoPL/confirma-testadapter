@@ -119,14 +119,13 @@ export class TestManager {
         return new Promise(async (resolve) => {
 
             const Logs:Promise<{state:boolean, log:string|undefined}> [] = [];
-            const results:ParsedResult = new ParsedResult(0,0,0,{count: 0, map: new Map()},[])
+            const results:ParsedResult = new ParsedResult(0,0,0,{count: 0, map: new Map()},[]);
 
             testCollection.forEach(test => {
                 this.run.started(test);
                 Logs.push(TestExecutor.Run(type,test));
             });
             let everyLog= await Promise.all(Logs);
-            console.log(everyLog);
 
             everyLog.forEach(logInfo => {
                 if (!logInfo.state)
@@ -135,17 +134,14 @@ export class TestManager {
                     return;
                 }
 
-                const result=parseResult(logInfo.log!)
-                console.log(result);
+                const result=parseResult(logInfo.log!);
                 results.sum(result);
             });
 
-            console.log(results);
             results.testedClasses.forEach(TestClass => {
                 const testItemClass = testCollection.get(TestClass.className);
                 if (!testItemClass) {console.error(`class: ${TestClass.className}, not found`); resolve(true); return;}
 
-                console.log(TestClass);
                 TestClass.tests.forEach((value) => {
                     const child = testItemClass.children.get(value.itemName);
 

@@ -26,7 +26,6 @@ export const parseResult = (text: string) => {
 
         const infoMatch = line.match(TerminalInfoRe);
         if (infoMatch) {
-            console.info("info", lineNo);
             passed = parseInt(infoMatch[1], 10);
             failed.count = parseInt(infoMatch[2], 10);
             ignored = parseInt(infoMatch[3], 10);
@@ -36,7 +35,6 @@ export const parseResult = (text: string) => {
 
         const classMatch = line.match(TerminalClsRe);
         if (classMatch) {
-            console.info("class", lineNo);
             const className = classMatch[1];
             const newClass: ITestClass = { className, tests: []};
             testedClasses.push(newClass);
@@ -46,7 +44,6 @@ export const parseResult = (text: string) => {
 
         const itemMatch = line.match(TerminalItemResultRe);
         if (itemMatch && currentClassIdx !== -1) {
-            console.info("item", lineNo);
             let status:ETestStatus = ETestStatus.Unknown;
             switch (itemMatch[3]) {
                 case "passed":
@@ -65,7 +62,6 @@ export const parseResult = (text: string) => {
 
             if (status === ETestStatus.Failed) {
                 const reason=lines[lineNo+1];
-                console.log(reason);
                 const ReasonMatch = reason.match(TerminalFailReasonRe);
                 let reasonOut = "";
                 if (!ReasonMatch) {
