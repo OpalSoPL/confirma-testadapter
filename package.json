@@ -3,7 +3,7 @@
   "publisher": "OpalSoPLdev",
   "displayName": "Confirma Test Adapter",
   "description": "Test Adapter for Confirma",
-  "version": "0.1.0",
+  "version": "0.1.0--beta",
   "license":"MIT",
   "icon": "/logo/adapter_icon256.png",
   "engines": {
