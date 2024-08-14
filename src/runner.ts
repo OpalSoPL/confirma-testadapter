@@ -117,7 +117,6 @@ export class TestManager {
     ExecuteTest (testCollection: Map<string,vscode.TestItem>,type:ETestType)
     {
         return new Promise(async (resolve) => {
-
             const Logs:Promise<{state:boolean, log:string|undefined}> [] = [];
             const results:ParsedResult = new ParsedResult(0,0,0,{count: 0, map: new Map()},[]);
 
@@ -126,24 +125,29 @@ export class TestManager {
                 Logs.push(TestExecutor.Run(type,test));
             });
             let everyLog= await Promise.all(Logs);
-
             everyLog.forEach(logInfo => {
                 if (!logInfo.state)
                 {
                     resolve(false);
                     return;
                 }
-
                 const result=parseResult(logInfo.log!);
                 results.sum(result);
             });
-
             results.testedClasses.forEach(TestClass => {
-                const testItemClass = testCollection.get(TestClass.className);
-                if (!testItemClass) {console.error(`class: ${TestClass.className}, not found`); resolve(true); return;}
+                let testItemClass = testCollection.get(TestClass.className);
+                if (!testItemClass)
+                {
+                    let testMethod = testCollection.get(TestClass.tests[0].itemName);
+                    if (!testMethod)
+                    {
+                        console.error(`item: ${TestClass.tests[0].itemName}, not found`); resolve(true); return;
+                    }
+                    testItemClass = testMethod.parent;
+                }
 
                 TestClass.tests.forEach((value) => {
-                    const child = testItemClass.children.get(value.itemName);
+                    const child = testItemClass!.children.get(value.itemName);
 
                     if (!child) {console.error(`item: ${value.itemName}, not found`); resolve(true); return;}
                     switch(value.status){
