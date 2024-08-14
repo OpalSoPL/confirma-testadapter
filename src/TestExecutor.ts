@@ -109,12 +109,30 @@ export class TestExecutor
         return workspacePath;
     }
     static getGodotPath():string | undefined {
+        const binExtensionsReg=/.exe|.app|.x86_64/;
         const config = vscode.workspace.getConfiguration();
         const godotPath = config.get<string>("confirma-testadapter.godot-path");
 
         if (!godotPath) {
-            return process.env.GODOT;
+            let path = process.env.GODOT;
+            if (!path)
+            {
+                vscode.window.showErrorMessage("GODOT variable isn't set");
+                return undefined;
+            }
+
+            if (binExtensionsReg.test(path))
+            {
+                return path;
+            }
+            vscode.window.showErrorMessage("GODOT variable isn't valid");
+            return undefined;
         }
-        return godotPath;
+        if (binExtensionsReg.test(godotPath))
+            {
+                return godotPath;
+            }
+        vscode.window.showErrorMessage("confirma-testadapter.godot-path variable isn't valid");
+        return undefined;
     }
 }
