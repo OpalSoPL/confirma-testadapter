@@ -15,11 +15,11 @@ Extension requires:
 - Godot Engine Mono (C# support)
 - Project.godot in main directory of workspace
 - Godot Addon "Confirma" (0.7.0 beta or Higher) in /addons/ directory
-- env variable set for `GODOT` containing path to godot binary or VSCode 
+- env variable set for `GODOT` containing path to godot binary or set in VSCode
 
 ## Extension Settings
 This extension contributes the following settings:
-* `confirma-testadapter.Godot`: Sets godot path, overides system varbiable `GODOT` 
+* `confirma-testadapter.Godot`: Sets godot path, overides system varbiable `GODOT`
 
 ## Known Issues
 

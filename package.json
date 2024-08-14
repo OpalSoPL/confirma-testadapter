@@ -4,17 +4,22 @@
   "displayName": "Confirma Test Adapter",
   "description": "Test Adapter for Confirma",
   "version": "0.1.0",
+  "license":"MIT",
+  "icon": "/logo/adapter_icon256.png",
   "engines": {
     "vscode": "^1.91.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpalSoPL/confirma-testadapter.git"
+  },
   "categories": [
-    "Other"
+    "Testing"
   ],
   "activationEvents": [
     "onWorkspaceFoldersChanged",
     "onLanguage:csharp",
-    "workspaceContains:project.godot",
-    "workspaceContains:/addons/confirma"
+    "workspaceContains:project.godot"
   ],
   "main": "./dist/extension.js",
   "contributes": {

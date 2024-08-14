@@ -1,9 +1,0 @@
-$GODOT --build-solutions --headless --quit //build project and exit
-$GODOT --headless -- --confirma-quit --confirma-run=CLASSNAME --confirma-verbose --confirma-method=METHODNAME //run tests
-
-//if
-ERROR: Command line option --build-solutions was passed, but the build callback failed. Aborting.
-//emit error:
-build error
-
-//useful site: https://regex101.com/
