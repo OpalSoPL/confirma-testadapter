@@ -1,10 +1,11 @@
 import { ETestStatus, ITestCase, ITestClass } from "./Interfaces";
+import * as vscode from 'vscode';
 
 const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
-const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?[a-zA-Z]*(?<method>\s[A-Za-z_][A-Za-z_0-9]*\s*)/;
+const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))([a-zA-Z|void]+)\s(?<method>[A-Za-z_][A-Za-z_0-9]+)/;
 
-const classHeader = /^\[TestClass\]/;
-const itemHeader = /^\[TestCase\]/;
+const classHeader = /\[TestClass\]/;
+const itemHeader = /\[TestCase(\(([A-z0-9\)\(\?\[\]\s\{\},"'-][^\n]*)\))*\]/;
 
 export const parseFile = (text: string) => {
     //console.info(text);
@@ -27,7 +28,6 @@ export const parseFile = (text: string) => {
         const classAtributeMatch = line.match(classHeader);
         if (classAtributeMatch) {
             testClassFlag = true;
-            console.info(1);
         }
         //console.info(testClassFlag,lineNo);
 
@@ -43,10 +43,19 @@ export const parseFile = (text: string) => {
 
         const itemMatch = line.match(CSharpMethodNameRe);
         if (itemMatch && testCaseFlag && TestClasses.length > 0) {
-            let itemName = itemMatch[5];
-            let newitem : ITestCase =  {itemName, status: ETestStatus.Unknown};
+
+            let itemName;
+            if (itemMatch.groups) {
+                    itemName = itemMatch.groups.method;
+                }
+            else {
+                itemName = "";
+            }
+
+            let newitem : ITestCase =  {itemName};
 
             TestClasses[TestClasses.length-1].tests.push(newitem);
+            testCaseFlag = false;
         }
     }
     return TestClasses;

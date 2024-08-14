@@ -1,22 +1,37 @@
 {
   "name": "confirma-testadapter",
-  "publisher": "OpalSoPL",
-  "displayName": "confirma testadapter",
-  "description": "",
-  "version": "0.0.0",
+  "publisher": "OpalSoPLdev",
+  "displayName": "Confirma Test Adapter",
+  "description": "Test Adapter for Confirma",
+  "version": "0.1.0--beta",
+  "license":"MIT",
+  "icon": "/logo/adapter_icon256.png",
   "engines": {
     "vscode": "^1.91.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpalSoPL/confirma-testadapter.git"
+  },
   "categories": [
-    "Other"
+    "Testing"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onWorkspaceFoldersChanged",
+    "onLanguage:csharp",
+    "workspaceContains:project.godot"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
+    "configuration":[
       {
-        "command": "confirma-testadapter.helloWorld",
-        "title": "Hello World"
+        "title": "confirma-testadapter",
+        "properties": {
+          "confirma-testadapter.godot-path":{
+            "type":["string","null"],
+            "default":null,
+            "description": "Specifies the path of the Godot binary. If empty, uses the $GODOT environment variable."
+          }}
       }
     ]
   },
@@ -32,6 +47,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "measure-time": "5.0.8",
     "@types/vscode": "^1.91.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
