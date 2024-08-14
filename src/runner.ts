@@ -11,20 +11,12 @@ const buildCommand = 'dotnet build';
 export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:vscode.CancellationToken,testCtrl: vscode.TestController) => {
     const run = testCtrl.createTestRun(request);
 
-    let workspacePath = "";
-    if (vscode.workspace.workspaceFolders !== undefined) {
-        workspacePath = vscode.workspace.workspaceFolders[0].uri.path;
-    }
+    let workspacePath = TestExecutor.getWorkspacePath();
 
     const testRunner = new TestManager (run,workspacePath);
 
     try
     {
-        let workspacePath = "";
-        if (vscode.workspace.workspaceFolders !== undefined) {
-            workspacePath = vscode.workspace.workspaceFolders[0].uri.path;
-        }
-
         //build project
         const buildStatus = vscode.window.withProgress(
         {
@@ -37,7 +29,7 @@ export const  testConfigurationRun = async (request:vscode.TestRunRequest,token:
             const status = await testRunner.build(workspacePath);
 
             if (!status) {
-                vscode.window.showErrorMessage("Build error");
+                vscode.window.showErrorMessage("Build error"); //todo useless rn
                 return false;
             }
             return true;

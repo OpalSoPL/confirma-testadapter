@@ -104,10 +104,11 @@ export class TestExecutor
     {
         let workspacePath = "";
         if (vscode.workspace.workspaceFolders !== undefined) {
-            workspacePath = vscode.workspace.workspaceFolders[0].uri.path;
+            workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
         }
         return workspacePath;
     }
+
     static getGodotPath():string | undefined {
         const binExtensionsReg=/.exe|.app|.x86_64/;
         const config = vscode.workspace.getConfiguration();
