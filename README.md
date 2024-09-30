@@ -7,7 +7,8 @@ This Extension adds ability to run Confirma unit tests.
 | ----------------------- | --------------------------------------- |
 | 0.6.x beta *or earlier* | :x:                                     |
 | 0.7.x beta              | :white_check_mark: (*0.1.x*)            |
-| 0.8.x beta *(probably)* | :white_check_mark: (*0.1.x - only c# *) |
+| 0.8.0 - 0.8.1 beta      | :white_check_mark: (partial) (*0.1.x*)  |
+| 0.8.1+ beta             | :x:                                     |
 
 ## Requirements
 
