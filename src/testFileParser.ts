@@ -19,14 +19,14 @@ export const parseFile = (text: string) => {
     for (let lineNo = 0; lineNo < lines.length; lineNo++) {
         const line = lines[lineNo].trim();
 
-        //check for atributes
-        const itemAtributeMatch = line.match(itemHeader);
-        if (itemAtributeMatch) {
+        //check for attributes
+        const itemAttributeMatch = line.match(itemHeader);
+        if (itemAttributeMatch) {
             testCaseFlag =  true;
         }
 
-        const classAtributeMatch = line.match(classHeader);
-        if (classAtributeMatch) {
+        const classAttributeMatch = line.match(classHeader);
+        if (classAttributeMatch) {
             testClassFlag = true;
         }
         //console.info(testClassFlag,lineNo);
@@ -52,9 +52,9 @@ export const parseFile = (text: string) => {
                 itemName = "";
             }
 
-            let newitem : ITestCase =  {itemName};
+            let newItem : ITestCase =  {itemName};
 
-            TestClasses[TestClasses.length-1].tests.push(newitem);
+            TestClasses[TestClasses.length-1].tests.push(newItem);
             testCaseFlag = false;
         }
     }
