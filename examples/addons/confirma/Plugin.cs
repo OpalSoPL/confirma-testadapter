@@ -12,10 +12,12 @@ public partial class Plugin : EditorPlugin
 
     public override void _EnterTree()
     {
-        _testBottomPanel = GD.Load<PackedScene>("uid://bl21wviqvff84").Instantiate<Control>();
+        _testBottomPanel = GD.Load<PackedScene>(
+            GetPluginPath() + "/src/scenes/confirma_bottom_panel/ConfirmaBottomPanel.tscn"
+        ).Instantiate<Control>();
+        _ = AddControlToBottomPanel(_testBottomPanel, "Confirma");
 
-        AddAutoloadSingleton("Confirma", "res://addons/confirma/src/scenes/confirma_autoload/ConfirmaAutoload.tscn");
-        AddControlToBottomPanel(_testBottomPanel, "Confirma");
+        AddAutoloadSingleton("Confirma", GetPluginPath() + "/src/scenes/confirma_autoload/ConfirmaAutoload.tscn");
 
         GD.Print("Confirma is ready!");
     }
@@ -25,7 +27,14 @@ public partial class Plugin : EditorPlugin
         RemoveAutoloadSingleton("Confirma");
         RemoveControlFromBottomPanel(_testBottomPanel);
 
+        _testBottomPanel.Free();
+
         GD.Print("Confirma is disabled!");
+    }
+
+    private string GetPluginPath()
+    {
+        return GetScript().As<Script>().ResourcePath.GetBaseDir();
     }
 }
 #endif

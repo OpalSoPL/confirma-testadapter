@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Confirma.Attributes;
+using Confirma.Classes.Discovery;
 using Confirma.Exceptions;
 using Confirma.Helpers;
 using Confirma.Types;
@@ -29,14 +29,15 @@ public class TestingMethod
     {
         foreach (TestCase test in TestCases)
         {
-            for (ushort i = 0; i <= test.Repeat; i++)
+            for (ushort i = 0; i <= (test.Repeat?.Repeat ?? 0); i++)
             {
                 IgnoreAttribute? attr = test.Method.GetCustomAttribute<IgnoreAttribute>();
                 if (attr?.IsIgnored() == true)
                 {
                     Result.TestsIgnored++;
 
-                    TestOutput.PrintOutput(Name, test.Params, Ignored, props.IsVerbose, attr.Reason);
+                    TestLog log = new(Enums.ELogType.Method, Name, Ignored, test.Params, attr.Reason);
+                    Result.TestLogs.Add(log);
                     continue;
                 }
 
@@ -45,15 +46,25 @@ public class TestingMethod
                     test.Run();
                     Result.TestsPassed++;
 
-                    TestOutput.PrintOutput(Name, test.Params, Passed, props.IsVerbose);
+                    TestLog log = new(Enums.ELogType.Method, Name, Passed, test.Params);
+                    Result.TestLogs.Add(log);
                 }
                 catch (ConfirmAssertException e)
                 {
                     Result.TestsFailed++;
 
-                    TestOutput.PrintOutput(Name, test.Params, Failed, props.IsVerbose, e.Message);
+                    TestLog log = new(Enums.ELogType.Method, Name, Failed, test.Params, e.Message);
+                    Result.TestLogs.Add(log);
 
-                    if (props.ExitOnFail) props.CallExitOnFailure();
+                    if (test.Repeat?.FailFast == true)
+                    {
+                        break;
+                    }
+
+                    if (props.ExitOnFail)
+                    {
+                        props.CallExitOnFailure();
+                    }
                 }
             }
         }
@@ -61,18 +72,19 @@ public class TestingMethod
         return Result;
     }
 
-    private IEnumerable<TestCase> DiscoverTestCases()
+    private List<TestCase> DiscoverTestCases()
     {
         List<TestCase> cases = new();
-        using IEnumerator<System.Attribute> discovered =
-            TestDiscovery.GetTestCasesFromMethod(Method).GetEnumerator();
+        using IEnumerator<System.Attribute> discovered = CsTestDiscovery
+            .GetTestCasesFromMethod(Method)
+            .GetEnumerator();
 
         while (discovered.MoveNext())
         {
             switch (discovered.Current)
             {
                 case TestCaseAttribute testCase:
-                    cases.Add(new(Method, testCase.Parameters, 0));
+                    cases.Add(new(Method, testCase.Parameters, null));
                     continue;
                 // I rely on the order in which the attributes are defined
                 // to determine which TestCase attributes should be assigned values
@@ -97,12 +109,12 @@ public class TestingMethod
                             continue;
                         }
 
-                        cases.Add(new(Method, tc.Parameters, repeat.Repeat));
+                        cases.Add(new(Method, tc.Parameters, repeat));
                         break;
                     }
             }
         }
 
-        return cases.AsEnumerable();
+        return cases;
     }
 }
