@@ -1,4 +1,4 @@
-import { ETestStatus, ITestCase, ITestClass } from "./Interfaces";
+import { ETestStatus, ITestCase, ITestClass } from "../Interfaces";
 import * as vscode from 'vscode';
 
 const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
@@ -7,8 +7,7 @@ const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)
 const classHeader = /\[TestClass\]/;
 const itemHeader = /\[TestCase(\(([A-z0-9\)\(\?\[\]\s\{\},"'-][^\n]*)\))*\]/;
 
-export const parseFile = (text: string) => {
-    //console.info(text);
+export const CsParseFile = (text: string) => {
     let testClassFlag = false;
     let testCaseFlag = false;
 
@@ -29,7 +28,6 @@ export const parseFile = (text: string) => {
         if (classAttributeMatch) {
             testClassFlag = true;
         }
-        //console.info(testClassFlag,lineNo);
 
         const classMatch = line.match(CSharpClassNameRe);
         if (classMatch && testClassFlag) {
