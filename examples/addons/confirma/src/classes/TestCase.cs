@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using Confirma.Attributes;
 using Confirma.Exceptions;
 using Confirma.Helpers;
 
@@ -10,9 +11,13 @@ public class TestCase
     public MethodInfo Method { get; init; }
     public object?[]? Parameters { get; init; }
     public string Params { get; init; }
-    public ushort Repeat { get; init; }
+    public RepeatAttribute? Repeat { get; init; }
 
-    public TestCase(MethodInfo method, object?[]? parameters, ushort repeat)
+    public TestCase(
+        MethodInfo method,
+        object?[]? parameters,
+        RepeatAttribute? repeat
+    )
     {
         Method = method;
         Parameters = parameters;
@@ -28,11 +33,15 @@ public class TestCase
         }
         catch (TargetInvocationException tie)
         {
-            throw new ConfirmAssertException(tie.InnerException?.Message ?? tie.Message);
+            throw new ConfirmAssertException(
+                tie.InnerException?.Message ?? tie.Message
+            );
         }
         catch (Exception e) when (e is ArgumentException or ArgumentNullException)
         {
-            throw new ConfirmAssertException($"- Failed: Invalid test case parameters: {Params}.");
+            throw new ConfirmAssertException(
+                $"- Failed: Invalid test case parameters: {Params}."
+            );
         }
         catch (Exception e)
         {

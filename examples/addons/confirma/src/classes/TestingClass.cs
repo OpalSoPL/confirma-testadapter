@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Confirma.Attributes;
+using Confirma.Classes.Discovery;
+using Confirma.Enums;
 using Confirma.Helpers;
 using Confirma.Types;
+using Godot;
 
 namespace Confirma.Classes;
 
 public class TestingClass
 {
-    public readonly Type Type;
-    public readonly bool IsParallelizable;
-    public IEnumerable<TestingMethod> TestMethods;
+    public Type Type { get; init; }
+    public bool IsParallelizable { get; init; }
+    public IEnumerable<TestingMethod> TestMethods { get; set; }
 
     private TestsProps _props;
     private readonly Dictionary<string, LifecycleMethodData> _lifecycleMethods = new();
@@ -20,7 +23,7 @@ public class TestingClass
     public TestingClass(Type type)
     {
         Type = type;
-        TestMethods = TestDiscovery.DiscoverTestMethods(type);
+        TestMethods = CsTestDiscovery.DiscoverTestMethods(type);
         IsParallelizable = type.GetCustomAttribute<ParallelizableAttribute>() is not null;
 
         InitialLookup();
@@ -29,29 +32,47 @@ public class TestingClass
     public TestClassResult Run(TestsProps props)
     {
         uint passed = 0, failed = 0, ignored = 0, warnings = 0;
+        List<TestLog> testLogs = new();
 
         _props = props;
 
-        warnings += RunLifecycleMethod("BeforeAll");
+        warnings += RunLifecycleMethod("BeforeAll", ref testLogs);
 
-        if (!string.IsNullOrEmpty(props.MethodName))
+        if (!string.IsNullOrEmpty(props.Target.DetailedName))
         {
-            TestMethods = TestMethods.Where(tm => tm.Name == props.MethodName);
+            TestMethods = TestMethods.Where(
+                tm => tm.Name == props.Target.DetailedName
+            );
 
             if (!TestMethods.Any())
             {
-                Log.PrintError($"No test Methods found with the name '{props.MethodName}'.");
-                return new TestClassResult(0, 0, 0, 1);
+                testLogs.Add(new(ELogType.Error,
+                    $"No test Methods found with the name '{props.Target.DetailedName}'."
+                ));
+
+                return new(0, 0, 0, 1, testLogs);
             }
         }
 
         foreach (TestingMethod method in TestMethods)
         {
-            warnings += RunLifecycleMethod("SetUp");
+            warnings += RunLifecycleMethod("SetUp", ref testLogs);
+
+            int currentOrphans = GetOrphans();
 
             TestMethodResult methodResult = method.Run(props);
+            testLogs.AddRange(methodResult.TestLogs);
 
-            warnings += RunLifecycleMethod("TearDown");
+            warnings += RunLifecycleMethod("TearDown", ref testLogs);
+
+            int newOrphans = GetOrphans();
+            if (currentOrphans < newOrphans)
+            {
+                warnings++;
+                testLogs.Add(new(ELogType.Warning,
+                    $"Calling {method.Name} created {newOrphans - currentOrphans} new orphan/s.\n"
+                ));
+            }
 
             passed += methodResult.TestsPassed;
             failed += methodResult.TestsFailed;
@@ -59,9 +80,9 @@ public class TestingClass
             warnings += methodResult.Warnings;
         }
 
-        warnings += RunLifecycleMethod("AfterAll");
+        warnings += RunLifecycleMethod("AfterAll", ref testLogs);
 
-        return new(passed, failed, ignored, warnings);
+        return new(passed, failed, ignored, warnings, testLogs);
     }
 
     private void InitialLookup()
@@ -82,7 +103,7 @@ public class TestingClass
         _lifecycleMethods.Add(name, new(methods.First(), name, methods.Count() > 1));
     }
 
-    private byte RunLifecycleMethod(string name)
+    private byte RunLifecycleMethod(string name, ref List<TestLog> testLogs)
     {
         if (!_lifecycleMethods.TryGetValue(name, out LifecycleMethodData? method))
         {
@@ -91,12 +112,17 @@ public class TestingClass
 
         if (method.HasMultiple)
         {
-            Log.PrintWarning($"Multiple [{name}] methods found in {Type.Name}. Running only the first one.\n");
+            testLogs.Add(new(ELogType.Warning,
+                $"Multiple [{name}] methods found in {Type.Name}. "
+                + "Running only the first one.\n"
+            ));
         }
 
         if (_props.IsVerbose)
         {
-            Log.PrintLine($"[{name}] {Type.Name}");
+            testLogs.Add(new(ELogType.Info,
+                $"[{name}] {Type.Name}"
+            ));
         }
 
         try
@@ -105,9 +131,20 @@ public class TestingClass
         }
         catch (Exception e)
         {
-            Log.PrintError($"- {e.Message}");
+            testLogs.Add(new(ELogType.Error,
+                $"- {e.Message}"
+            ));
         }
 
         return method.HasMultiple ? (byte)1 : (byte)0;
+    }
+
+    private int GetOrphans()
+    {
+        return !_props.MonitorOrphans
+            ? 0
+            : (int)Performance.Singleton.GetMonitor(
+                Performance.Monitor.ObjectOrphanNodeCount
+            );
     }
 }
