@@ -1,60 +1,56 @@
-import { ETestStatus, ITestCase, ITestClass } from "../Interfaces";
-import * as vscode from 'vscode';
+import { ECurrentFlag, ETestStatus, ITestCase, ITestClass } from "../Interfaces";
 
-const CSharpClassNameRe = /\bclass\s+([a-zA-Z0-9_]+)\b/;
-const CSharpMethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))([a-zA-Z|void]+)\s(?<method>[A-Za-z_][A-Za-z_0-9]+)/;
+const ClassNameRe = /\bclass\s+(\w+)/;
+const MethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))([(\w)|void]+)\s(?<method>\w+)/;
 
 const classHeader = /\[TestClass\]/;
 const itemHeader = /\[TestCase(\(([A-z0-9\)\(\?\[\]\s\{\},"'-][^\n]*)\))*\]/;
 
-export const CsParseFile = (text: string) => {
-    let testClassFlag = false;
-    let testCaseFlag = false;
+let currentFlag: ECurrentFlag = ECurrentFlag.None;
+
+export const CsParseFile = (text: string): ITestClass[] => {
 
     let TestClasses: ITestClass[] = [];
 
     const lines = text.split('\n');
 
-    for (let lineNo = 0; lineNo < lines.length; lineNo++) {
-        const line = lines[lineNo].trim();
+    for (const line of lines) {
 
         //check for attributes
-        const itemAttributeMatch = line.match(itemHeader);
-        if (itemAttributeMatch) {
-            testCaseFlag =  true;
+        if (itemHeader.test(line)) {
+            currentFlag = ECurrentFlag.TestCase;
         }
 
-        const classAttributeMatch = line.match(classHeader);
-        if (classAttributeMatch) {
-            testClassFlag = true;
+        if (classHeader.test(line)) {
+            currentFlag = ECurrentFlag.TestClass;
         }
 
-        const classMatch = line.match(CSharpClassNameRe);
-        if (classMatch && testClassFlag) {
+        const classMatch = line.match(ClassNameRe);
+        if (classMatch && flagIsEqual(ECurrentFlag.TestClass)) {
             let className = classMatch[1];
-            let newClass: ITestClass = {className, tests: []};
 
-            TestClasses.push(newClass);
-            testClassFlag = false;
+            TestClasses.push({className, tests: []});
             continue;
         }
 
-        const itemMatch = line.match(CSharpMethodNameRe);
-        if (itemMatch && testCaseFlag && TestClasses.length > 0) {
+        const itemMatch = line.match(MethodNameRe);
+        if (itemMatch && flagIsEqual(ECurrentFlag.TestCase) && TestClasses.length > 0) {
 
-            let itemName;
             if (itemMatch.groups) {
-                    itemName = itemMatch.groups.method;
-                }
-            else {
-                itemName = "";
+                let itemName = itemMatch.groups.method;
+                let newItem : ITestCase =  {itemName};
+                TestClasses[TestClasses.length-1].tests.push(newItem);
             }
-
-            let newItem : ITestCase =  {itemName};
-
-            TestClasses[TestClasses.length-1].tests.push(newItem);
-            testCaseFlag = false;
         }
+        clearFlag();
     }
     return TestClasses;
 };
+
+function flagIsEqual(value: ECurrentFlag): boolean {
+    return currentFlag === value;
+}
+
+function clearFlag (): void {
+    currentFlag = ECurrentFlag.None;
+}

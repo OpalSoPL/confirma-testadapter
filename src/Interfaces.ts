@@ -22,3 +22,10 @@ export enum ETestType {
     Class,
     Method
 }
+
+export enum ECurrentFlag
+{
+    None,
+    TestCase,
+    TestClass
+}
