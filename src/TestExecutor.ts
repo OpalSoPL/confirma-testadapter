@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
-import { ETestType } from './Interfaces';
+import { ETestType } from "./enums/ETestType";
 
 
 

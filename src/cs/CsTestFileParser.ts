@@ -1,4 +1,7 @@
-import { ECurrentFlag, ETestStatus, ITestCase, ITestClass } from "../Interfaces";
+import { ITestClass } from "../interfaces/ITestClass";
+import { ITestCase } from "../interfaces/ITestCase";
+import { ETestStatus } from "../enums/ETestStatus";
+import { ECurrentFlag } from "../enums/ECurrentFlag";
 
 const ClassNameRe = /\bclass\s+(\w+)/;
 const MethodNameRe = /\bpublic\s+(async\s+)?(static|virtual|abstract|void)?\s*(async\s+)?(Task\s+)?((?!class))([(\w)|void]+)\s(?<method>\w+)/;

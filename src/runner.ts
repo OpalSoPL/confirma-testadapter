@@ -1,7 +1,9 @@
 import { exec } from "child_process";
 import { parseResult } from "./testResultParser";
 import * as vscode from "vscode";
-import { ETestStatus, ETestType, ITestCase} from "./Interfaces";
+import { ITestCase } from "./interfaces/ITestCase";
+import { ETestStatus } from "./enums/ETestStatus";
+import { ETestType } from "./enums/ETestType";
 import {TestExecutor} from "./TestExecutor";
 import { ParsedResult, IFailed } from "./ParsedResult";
 

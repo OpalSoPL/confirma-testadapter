@@ -2,7 +2,9 @@
 import * as vscode from 'vscode';
 import { CsParseFile } from './cs/CsTestFileParser';
 import * as runner from './runner';
-import { ITestClass, ITestCase, ETestStatus } from './Interfaces';
+import { ITestClass } from "./interfaces/ITestClass";
+import { ITestCase } from "./interfaces/ITestCase";
+import { ETestStatus } from "./enums/ETestStatus";
 import { discoverTests } from './DiscoverTests';
 
 export function activate(context: vscode.ExtensionContext) {

@@ -1,6 +1,8 @@
 
 import { Debug } from './debug';
-import {ETestStatus, ITestCase, ITestClass} from './Interfaces';
+import { ITestClass } from "./interfaces/ITestClass";
+import { ITestCase } from "./interfaces/ITestCase";
+import { ETestStatus } from "./enums/ETestStatus";
 import * as vscode from 'vscode';
 import { ParsedResult } from './ParsedResult';
 const TerminalInfoRe = /([0-9]+) passed, ([0-9]+) failed, ([0-9]+) ignored, ([0-9]+) warnings/;

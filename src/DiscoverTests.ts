@@ -16,7 +16,6 @@ export const discoverTests = async () => {
             case "plaintext":
                 GdParseFile(document.getText());
                 break;
-            default:
         }
         // const testClasses = parseFile(document.getText());
 
