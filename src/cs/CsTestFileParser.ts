@@ -45,7 +45,10 @@ export const CsParseFile = (text: string): ITestClass[] => {
                 TestClasses[TestClasses.length-1].tests.push(newItem);
             }
         }
-        clearFlag();
+        if (itemMatch || classMatch) {
+            clearFlag();
+        }
+
     }
     return TestClasses;
 };
