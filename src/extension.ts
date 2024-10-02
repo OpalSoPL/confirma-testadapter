@@ -1,33 +1,20 @@
-
 import * as vscode from 'vscode';
-import { CsParseFile } from './cs/CsTestFileParser';
 import * as runner from './runner';
-import { ITestClass } from "./interfaces/ITestClass";
-import { ITestCase } from "./interfaces/ITestCase";
-import { ETestStatus } from "./enums/ETestStatus";
-import { discoverTests } from './DiscoverTests';
+import { TestController } from './TestController';
 
 export function activate(context: vscode.ExtensionContext) {
-    const testCtrl = vscode.tests.createTestController('confirmaTestControler', "Confirma");
-    context.subscriptions.push(testCtrl);
 
-
+    var controller = new TestController(context);
     //Discover tests on activation
-    discoverTests();
+    controller.discoverTests();
 
     //Watch for changes in the workspace
-    const fileWatcher = vscode.workspace.createFileSystemWatcher('**/*.cs');
-    fileWatcher.onDidChange(discoverTests);
-    fileWatcher.onDidCreate(discoverTests);
-    fileWatcher.onDidDelete(discoverTests);
+    const fileWatcher = vscode.workspace.createFileSystemWatcher('{**/*.cs, **/*.gd}');
+    fileWatcher.onDidChange(controller.discoverTests);
+    fileWatcher.onDidCreate(controller.discoverTests);
+    fileWatcher.onDidDelete(controller.discoverTests);
 
     context.subscriptions.push(fileWatcher);
-
-    testCtrl.createRunProfile(
-        'Run Tests',
-        vscode.TestRunProfileKind.Run,
-        async (request,token) => {await runner.testConfigurationRun(request,token,testCtrl);},
-        true);
 }
 
 export function deactivate() {}
