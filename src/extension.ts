@@ -1,48 +1,21 @@
-
 import * as vscode from 'vscode';
-import { parseFile } from './testFileParser';
 import * as runner from './runner';
-import { ITestClass, ITestCase, ETestStatus } from './Interfaces';
+import { TestController } from './TestController';
 
 export function activate(context: vscode.ExtensionContext) {
-    const testCtrl = vscode.tests.createTestController('confirmaTestControler', "Confirma");
-    context.subscriptions.push(testCtrl);
 
-    const discoverTests = async () => {
-        const testFiles = await vscode.workspace.findFiles('**/*.cs','{**/.godot/**,**/addons/**}');
-
-        for (const file of testFiles) {
-            const document = await vscode.workspace.openTextDocument(file);
-            const testClasses = parseFile(document.getText());
-
-            for (const testClass of testClasses) {
-                const classItem = testCtrl.createTestItem(testClass.className, testClass.className, file);
-                                testCtrl.items.add(classItem);
-
-                for (const testCase of testClass.tests) {
-                    const testItem = testCtrl.createTestItem(testCase.itemName, testCase.itemName, file);
-                    classItem.children.add(testItem);
-                }
-            }
-        }
-    };
-
+    var controller = new TestController(context);
     //Discover tests on activation
-    discoverTests();
+    controller.discoverTests();
 
     //Watch for changes in the workspace
-    const fileWatcher = vscode.workspace.createFileSystemWatcher('**/*.cs');
-    fileWatcher.onDidChange(discoverTests);
-    fileWatcher.onDidCreate(discoverTests);
-    fileWatcher.onDidDelete(discoverTests);
+    const fileWatcher = vscode.workspace.createFileSystemWatcher('{**/*.cs, **/*.gd}');
+
+    fileWatcher.onDidChange((uri) => controller.discoverTests()); //todo create new method `changeTest`
+    fileWatcher.onDidCreate((uri) => controller.discoverTests()); //todo create new method `addTest`
+    fileWatcher.onDidDelete((uri) => controller.discoverTests()); //todo create new method `removeTest`
 
     context.subscriptions.push(fileWatcher);
-
-    testCtrl.createRunProfile(
-        'Run Tests',
-        vscode.TestRunProfileKind.Run,
-        async (request,token) => {await runner.testConfigurationRun(request,token,testCtrl);},
-        true);
 }
 
 export function deactivate() {}

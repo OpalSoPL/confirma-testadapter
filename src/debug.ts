@@ -1,4 +1,4 @@
-import { ITestClass } from "./Interfaces";
+import { ITestClass } from "./interfaces/ITestClass";
 
 export class Debug
 {

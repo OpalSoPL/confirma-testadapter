@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
-import { ETestType } from './Interfaces';
+import { ETestType } from "./enums/ETestType";
 
 
 
@@ -34,7 +34,7 @@ export class TestExecutor
     {
         return new Promise(resolve => {
             const path = TestExecutor.getWorkspacePath();
-            exec (`${godotPath} --headless -- --confirma-run --confirma-verbose --confirma-disable-gd --confirma-sequential --confirma-quit`,
+            exec (`${godotPath} --headless -- --confirma-run --confirma-verbose --confirma-quit`,
                 {cwd: path},
                 (e,stdout,stderr) => {
                     resolve({

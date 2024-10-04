@@ -1,5 +1,6 @@
 import { Debug } from "./debug";
-import { ITestCase, ITestClass } from "./Interfaces";
+import { ITestClass } from "./interfaces/ITestClass";
+import { ITestCase } from "./interfaces/ITestCase";
 
 export class ParsedResult {
     passed:number = 0; //place for future features
