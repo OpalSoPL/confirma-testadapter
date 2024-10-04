@@ -3,7 +3,8 @@ import { ITestCase } from "../interfaces/ITestCase";
 import { ETestStatus } from "../enums/ETestStatus";
 
 export const GdParseFile = (text: string): ITestClass | undefined => {
-    const TestClassRe = /class_name(\s)+(?<className>\w+)(\s)+extends TestClass/m;
+    //const TestClassRe = /class_name(\s)+(?<className>\w+)(\s)+extends TestClass/m; //regex for confirma 0.8.1+
+    const TestClassRe =  /class_name(\s)+(?<className>\w+)/;
     const TestMethodRe = /func(\s)*(?<methodName>\w+)(\s)*\b\(\)/mg;
 
     var testClass = TestClassRe.exec(text);
