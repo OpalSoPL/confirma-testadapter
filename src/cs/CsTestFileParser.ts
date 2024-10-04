@@ -33,7 +33,6 @@ export const CsParseFile = (text: string): ITestClass[] => {
             let className = classMatch[1];
 
             TestClasses.push({className, tests: []});
-            continue;
         }
 
         const itemMatch = line.match(MethodNameRe);

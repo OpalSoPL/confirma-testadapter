@@ -48,9 +48,8 @@ export class TestController {
                     testClasses.push(b);
                     break;
             }
-
-            this.addTestsToTree(testClasses);
         }
+        this.addTestsToTree(testClasses);
     };
 
     addTestsToTree(tests: ITestClass[]):void {
