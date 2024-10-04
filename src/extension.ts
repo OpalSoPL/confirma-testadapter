@@ -10,9 +10,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     //Watch for changes in the workspace
     const fileWatcher = vscode.workspace.createFileSystemWatcher('{**/*.cs, **/*.gd}');
-    fileWatcher.onDidChange(controller.discoverTests);
-    fileWatcher.onDidCreate(controller.discoverTests);
-    fileWatcher.onDidDelete(controller.discoverTests);
+
+    fileWatcher.onDidChange((uri) => controller.discoverTests()); //todo create new method `changeTest`
+    fileWatcher.onDidCreate((uri) => controller.discoverTests()); //todo create new method `addTest`
+    fileWatcher.onDidDelete((uri) => controller.discoverTests()); //todo create new method `removeTest`
 
     context.subscriptions.push(fileWatcher);
 }
