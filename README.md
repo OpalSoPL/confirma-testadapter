@@ -15,7 +15,7 @@ This Extension adds ability to run Confirma unit tests.
 Extension requires:
 - Godot Engine Mono (C# support)
 - Project.godot in main directory of workspace
-- Godot Addon "Confirma" (see compatibility [here](#supported_versions-of-confirma)) in /addons/ directory
+- Godot Addon "Confirma" (see compatibility [here](#supported-versions-of-confirma)) in /addons/ directory
 - env variable set for `GODOT` containing path to godot binary or set in VSCode
 
 ## Extension Settings
