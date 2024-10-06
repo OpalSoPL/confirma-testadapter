@@ -1,0 +1,2 @@
+#exclude tests extension from linguist
+extension_test/** linguist-vendored
