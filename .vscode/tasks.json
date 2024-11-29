@@ -35,6 +35,19 @@
 				"npm: watch-tests"
 			],
 			"problemMatcher": []
-		}
+		},
+		{
+            "label": "Create VSIX Package",
+            "type": "shell",
+            "command": "vsce",
+            "args": [
+                "package"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
 	]
 }
