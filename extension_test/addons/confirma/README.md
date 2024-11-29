@@ -15,11 +15,11 @@
 
 ## Overview
 
-![Confirma](https://github.com/user-attachments/assets/c203bc64-03ea-4830-95ba-eb0fa954fce9)
+![Confirma](https://github.com/user-attachments/assets/ee03605f-8ed1-4329-ace5-aabd8788ec76)
 
 ### Features
 
-- Writing and executing tests in C# and GDScript (experimental)
+- Writing and executing tests in C# and GDScript
 - Custom assertion library (over 130 assertions)
 - Extensions for Random class
 - Independent of Godot editor (but can be accessed from Godot)

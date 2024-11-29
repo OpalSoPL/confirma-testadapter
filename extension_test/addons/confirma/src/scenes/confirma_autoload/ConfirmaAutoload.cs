@@ -12,10 +12,9 @@ namespace Confirma.Scenes;
 [Tool]
 public partial class ConfirmaAutoload : Node
 {
-    [Signal]
-    public delegate void GdAssertionFailedEventHandler(string message);
-
     public TestsProps Props = new();
+
+    private bool _usedConfirmaApi;
 
     public override void _Ready()
     {
@@ -53,6 +52,11 @@ public partial class ConfirmaAutoload : Node
 
         foreach (string arg in args)
         {
+            if (arg.StartsWith(prefix, InvariantCulture))
+            {
+                _usedConfirmaApi = true;
+            }
+
             if (!Props.RunTests && arg.StartsWith(prefix + "run", InvariantCulture))
             {
                 string name = ParseArgumentContent(arg);
@@ -68,11 +72,20 @@ public partial class ConfirmaAutoload : Node
 
                 continue;
             }
-            else if (Props.RunTests
-                && !Props.Target.Name.Equals(string.Empty, Ordinal)
+
+            if (Props.RunTests
                 && arg.StartsWith(prefix + "method", InvariantCulture)
             )
             {
+                if (string.IsNullOrEmpty(Props.Target.Name))
+                {
+                    Log.PrintError(
+                        "Invalid value: argument '--confirma-run' cannot be empty"
+                        + " when using argument '--confirma-method'.\n"
+                    );
+                    return false;
+                }
+
                 string method = ParseArgumentContent(arg);
 
                 if (string.IsNullOrEmpty(method))
@@ -87,6 +100,27 @@ public partial class ConfirmaAutoload : Node
                 {
                     Target = ERunTargetType.Method,
                     DetailedName = method
+                };
+
+                continue;
+            }
+
+            if (arg.StartsWith(prefix + "category", InvariantCulture))
+            {
+                string category = ParseArgumentContent(arg);
+
+                if (string.IsNullOrEmpty(category))
+                {
+                    Log.PrintError(
+                        "Invalid value: '--confirma-category' cannot be empty.\n"
+                    );
+                    return false;
+                }
+
+                Props.Target = Props.Target with
+                {
+                    Target = ERunTargetType.Category,
+                    Name = category
                 };
 
                 continue;
@@ -110,9 +144,9 @@ public partial class ConfirmaAutoload : Node
                 continue;
             }
 
-            if (!Props.MonitorOrphans && arg == "--experimental-monitor-orphans")
+            if (Props.MonitorOrphans && arg == prefix + "disable-orphans-monitor")
             {
-                Props.MonitorOrphans = true;
+                Props.MonitorOrphans = false;
                 continue;
             }
 
@@ -181,6 +215,13 @@ public partial class ConfirmaAutoload : Node
     {
         if (!Props.RunTests)
         {
+            if (_usedConfirmaApi)
+            {
+                Log.PrintWarning(
+                    "You're trying to use Confirma without '--confirma-run' argument."
+                    + " The game continues normally.\n"
+                );
+            }
             return;
         }
 

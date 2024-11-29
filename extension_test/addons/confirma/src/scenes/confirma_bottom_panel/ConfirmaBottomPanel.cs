@@ -8,9 +8,14 @@ namespace Confirma.Scenes;
 public partial class ConfirmaBottomPanel : Control
 {
 #nullable disable
-    private Button _runAllTests, _runCSharpTests, _runGdScriptTests, _clearOutput;
-    private CheckBox _verbose;
+    private Button
+        _runAllTests,
+        _runCSharpTests,
+        _runGdScriptTests,
+        _clearOutput,
+        _settings;
     private TestRunnerEditor _testRunner;
+    private Window _settingsWindow;
     private ConfirmaAutoload _autoload;
 #nullable restore
 
@@ -28,11 +33,14 @@ public partial class ConfirmaBottomPanel : Control
         _clearOutput = GetNode<Button>("%ClearOutput");
         _clearOutput.Pressed += OnClearOutputPressed;
 
-        _verbose = GetNode<CheckBox>("%Verbose");
-
         _testRunner = GetNode<TestRunnerEditor>("%TestRunnerEditor");
         _testRunner.TestsExecutionStarted += OnTestsExecutionStarted;
         _testRunner.TestsExecutionFinished += OnTestsExecutionFinished;
+
+        _settings = GetNode<Button>("%Settings");
+        _settings.Pressed += OnSettingsPressed;
+
+        _settingsWindow = GetNode<Window>("%SettingsWindow");
 
         _ = CallDeferred("LateInit");
     }
@@ -40,8 +48,6 @@ public partial class ConfirmaBottomPanel : Control
     private void LateInit()
     {
         _autoload = GetNode<ConfirmaAutoload>("/root/Confirma");
-
-        _verbose.Toggled += (bool on) => _autoload.Props.IsVerbose = on;
     }
 
     private void ResetLanguagesToggle()
@@ -75,6 +81,12 @@ public partial class ConfirmaBottomPanel : Control
     private void OnClearOutputPressed()
     {
         _testRunner.ClearOutput();
+    }
+
+    private void OnSettingsPressed()
+    {
+        _settingsWindow.Show();
+        _settingsWindow.GrabFocus();
     }
 
     private void OnTestsExecutionStarted()
